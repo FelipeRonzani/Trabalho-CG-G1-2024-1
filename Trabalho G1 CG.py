@@ -10,6 +10,8 @@ tamanho_bola = 20
 velocidade_jogador = 10
 velocidade_bola_x = 5
 velocidade_bola_y = 5
+pontos_jogador_esquerdo = 0
+pontos_jogador_direito = 0
 
 # Posições Iniciais
 posicao_jogador_esquerdo = [50, altura_tela // 2 - altura_jogador // 2]
@@ -60,13 +62,21 @@ def desenha_area_goleira(surface, cor, rect):
     else:
         pygame.draw.arc(surface, cor, (rect.left - raio, rect.centery - raio, raio * 2, raio * 2), 3.141592653589793 / 2, 3 * 3.141592653589793 / 2, 8)
 
+# Função para desenhar o placar na tela
+def desenha_placar(surface):
+    fonte = pygame.font.SysFont(None, 50)
+    placar_esquerdo = fonte.render(str(pontos_jogador_esquerdo), True, (255, 255, 255))
+    placar_direito = fonte.render(str(pontos_jogador_direito), True, (255, 255, 255))
+    surface.blit(placar_esquerdo, (largura_tela // 4, 50))
+    surface.blit(placar_direito, (3 * largura_tela // 4, 50))
+
 # Função para desenhar a bola
 def desenha_bola(surface):
     pygame.draw.circle(surface, (255, 165, 0), (posicao_bola[0], posicao_bola[1]), tamanho_bola//2)
 
 # Função para atualizar a posição da bola
 def atualiza_bola():
-    global posicao_bola, direcao_bola
+    global posicao_bola, direcao_bola, pontos_jogador_esquerdo, pontos_jogador_direito
 
     # Atualiza a posição da bola
     posicao_bola[0] += direcao_bola[0] * velocidade_bola_x
@@ -112,8 +122,20 @@ def atualiza_bola():
             
     # Colisão da bola com as goleiras
     if (posicao_bola[0] - tamanho_bola / 2 <= posicao_goleira_esquerda[0] + 5 and
-        posicao_goleira_esquerda[1] <= posicao_bola[1] <= posicao_goleira_esquerda[1] + 300) or \
-        (posicao_bola[0] + tamanho_bola / 2 >= posicao_goleira_direita[0] - 5 and posicao_goleira_direita[1] <= posicao_bola[1] <= posicao_goleira_direita[1] + 300):
+        posicao_goleira_esquerda[1] <= posicao_bola[1] <= posicao_goleira_esquerda[1] + 300):
+        pontos_jogador_direito += 1
+        if pontos_jogador_direito == 10:
+            print("Jogador Direito Venceu!")
+            pygame.quit()
+            return
+        posicao_bola = [largura_tela // 2, altura_tela // 2]  # Reseta a posição da bola
+        direcao_bola[0] *= -1
+    if  (posicao_bola[0] + tamanho_bola / 2 >= posicao_goleira_direita[0] - 5 and posicao_goleira_direita[1] <= posicao_bola[1] <= posicao_goleira_direita[1] + 300):
+        pontos_jogador_esquerdo += 1
+        if pontos_jogador_esquerdo == 10:
+            print("Jogador Esquerdo Venceu!")
+            pygame.quit()
+            return
         posicao_bola = [largura_tela // 2, altura_tela // 2]  # Reseta a posição da bola
         direcao_bola[0] *= -1
 
@@ -161,6 +183,7 @@ def main():
         desenha_area_goleira(tela, (0, 0, 0), pygame.Rect(0, altura_tela // 2 - 150, 150, 300)) # Desenha as áreas na frente das goleiras
         desenha_area_goleira(tela, (0, 0, 0), pygame.Rect(largura_tela - 150, altura_tela // 2 - 150, 150, 300))
         desenha_jogadores(tela)
+        desenha_placar(tela)  # Desenha o placar na tela
         desenha_bola(tela)
         atualiza_bola()
 
